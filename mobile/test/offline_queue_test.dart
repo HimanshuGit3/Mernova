@@ -126,6 +126,23 @@ void main() {
     expect(q.pending, 0);
   });
 
+  test("only the owner's session sends (and sees) a queued report", () async {
+    final q = makeQueue();
+    await q.add(report('a'), ownerId: 'student-A');
+    await q.add(report('b'), ownerId: 'student-B');
+    expect(q.pendingFor('student-B'), 1);
+    expect(q.itemsFor('student-B').single.id, 'b');
+
+    final res = await q.flush(ownerId: 'student-B');
+    expect(res.sent, 1);
+    expect(sentIds, ['b']);
+    expect(q.items.single.id, 'a', reason: "A's report waits for A");
+
+    await q.flush(ownerId: 'student-A');
+    expect(sentIds, ['b', 'a']);
+    expect(q.pending, 0);
+  });
+
   test('adding the same report twice keeps one entry', () async {
     final q = makeQueue();
     await q.add(report('a'));

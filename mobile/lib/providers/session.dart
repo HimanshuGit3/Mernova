@@ -78,9 +78,13 @@ class Session extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Supplies this phone's push token so every sign-out path unregisters it (set in main).
+  String? Function()? deviceToken;
+
   Future<void> logout({String? fcmToken}) async {
+    final token = fcmToken ?? deviceToken?.call();
     try {
-      await api.post('/auth/logout', data: {if (fcmToken != null) 'fcmToken': fcmToken});
+      await api.post('/auth/logout', data: {if (token != null) 'fcmToken': token});
     } catch (_) {
       // Sign out locally even if the server cannot be reached.
     }

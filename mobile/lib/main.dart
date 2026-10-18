@@ -39,6 +39,7 @@ Future<void> main() async {
   final biometric = BiometricService(prefs);
   final push = PushService(api);
   final connectivity = ConnectivityStatus();
+  session.deviceToken = () => push.token;
 
   push.onOpenIssue = (id) => navigatorKey.currentState?.push(
         MaterialPageRoute<void>(builder: (_) => IssueDetailScreen(issueId: id)),
@@ -67,8 +68,9 @@ Future<void> main() async {
 
   // Offline queue (FR-58): send on reconnect, and retry due items every 30 s.
   Future<void> flush({bool force = false}) async {
-    if (session.status != SessionStatus.signedIn || queue.pending == 0) return;
-    final res = await queue.flush(force: force);
+    final me = session.user?.id;
+    if (session.status != SessionStatus.signedIn || queue.pendingFor(me) == 0) return;
+    final res = await queue.flush(force: force, ownerId: me);
     if (res.sent > 0) {
       messengerKey.currentState?.showSnackBar(SnackBar(content: Text('${res.sent} saved ${res.sent == 1 ? 'report was' : 'reports were'} sent')));
     }
@@ -227,7 +229,8 @@ class _WithBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visible = !context.watch<ConnectivityStatus>().online || context.watch<OfflineQueue>().pending > 0;
+    final me = context.watch<Session>().user?.id;
+    final visible = !context.watch<ConnectivityStatus>().online || context.watch<OfflineQueue>().pendingFor(me) > 0;
     // Same widget structure whether or not the banner shows, so the shell keeps its state
     // (selected tab, scroll). When shown, the banner takes the status-bar inset instead of the shell.
     return Column(

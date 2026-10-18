@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/models.dart';
+import '../../providers/session.dart';
 import '../../services/api.dart';
 import '../../services/device_services.dart';
 import '../../services/issues_service.dart';
@@ -210,7 +211,7 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
       if (OfflineQueue.isRetryable(e)) {
         // FR-58: no signal (or the server is down) → keep it on the phone and send it later.
         // The same clientRequestId is reused, so a report that did reach the server is never duplicated.
-        await context.read<OfflineQueue>().add(report);
+        await context.read<OfflineQueue>().add(report, ownerId: context.read<Session>().user?.id);
         await HapticFeedback.mediumImpact();
         if (!mounted) return;
         setState(() {
