@@ -15,7 +15,14 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - [x] Phase 8: QR scan-to-report (server + web verified; mobile scanner pending Flutter)
 - [x] Phase 9: Insights, Live Booth and transparency
 - [ ] Phase 10: Mobile delight and push — **server push done + tested; mobile code complete, checks pending Flutter install**
-- [ ] Phase 11: Hardening and delivery
+- [ ] Phase 11: Hardening and delivery — **all work done; every non-Flutter section 13 gate passes; the Flutter gate cannot run here**
+
+### Status at the end of the build (2026-10-18)
+
+The goal is **not fully met**: the Flutter gate (`flutter analyze && flutter test && flutter build apk --debug`) and the mobile visual QA need Flutter and the Android SDK, which are not installed on this machine. Everything else is built, tested and documented. To finish:
+
+1. Install Flutter + Android SDK (Needs the user, item 1).
+2. In a new session: "continue from PROGRESS.md". The next steps are, in `mobile/`: `flutter create … .`, `flutter pub get`, `flutter analyze` (fix whatever the analyzer reports: the code was written without a compiler), `flutter test` (20 tests), `flutter build apk --debug` with and without the Firebase defines, then emulator QA and screenshots into `docs/screenshots/mobile/`, then tick phases 6, 10 and 11.
 
 ## Environment (detected 2026-10-18)
 
@@ -42,6 +49,15 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - Phase 8: Playwright 10/10 (new: add room + printable sticker), server lookup/inactive tests pass, printed sheet + Locations screenshots reviewed, no overflow. Mobile scanner + QR parser test written, not run.
 - Phase 9: Playwright 11/11 (new: Live Booth updates on API create), lint/build clean, Insights + /live (1920×1080) screenshots reviewed, no overflow; chart palette validated.
 - Phase 10: server 407 passed (4 new push tests); idempotency covered. Mobile onboarding, biometrics, offline queue (+8 unit tests), push written, NOT analysed/run (Flutter missing).
+- Phase 11 (final gate run, one pass):
+  - `npm test -w server` → Test Files 11 passed | 1 skipped; **Tests 414 passed** | 1 skipped (optional real-model test, passes via `npm run test:ai`)
+  - `npm run e2e` → **7/7** scenario steps
+  - `npm run lint -w client` → clean (exit 0); `npm run lint -w server` → clean
+  - `npm run build -w client` → built
+  - `npm run test:ui -w client` → **11 passed**
+  - `npm run screenshots -w client` → 84 screenshots, no horizontal overflow; final review: no open visual issues (web)
+  - `cd mobile && flutter analyze && flutter test && flutter build apk --debug` → **`flutter: command not found`** (Needs the user, item 1)
+  - Fresh-eyes subagent review: 7 findings, 6 fixed with regression tests, 1 accepted with reason (DECISIONS D-32/D-33)
 
 ## Known issues
 
@@ -53,5 +69,5 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
    `flutter create --org com.fixitcampus --project-name fixit_campus --platforms android .`
    (generates the Gradle wrapper and the remaining platform files without overwriting the committed ones), then `flutter pub get`.
 2. **Windows Firewall**: allow inbound TCP 5000 on the Private network so a physical phone can reach the API (README, "Phone on the same Wi-Fi"). Needs admin rights.
-3. **Firebase (optional, for background push)**: follow `docs/FIREBASE_SETUP.md` once it exists. The app works without it.
+3. **Firebase (optional, for background push)**: follow `docs/FIREBASE_SETUP.md`. The app works without it.
 4. **Campus coordinates**: check `CAMPUS_CENTER_LAT/LNG` in `server/.env` (see DECISIONS.md D-03).
