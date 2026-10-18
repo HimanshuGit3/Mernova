@@ -100,7 +100,7 @@ Example login response:
 
 | Method | Path | Roles | Request | Response | Errors |
 | --- | --- | --- | --- | --- | --- |
-| POST | `/issues/analyse` | S, A | multipart: `photo` (JPEG/PNG ≤ 5 MB), `lat?`, `lng?`, `locationId?` | `200 { suggestion: { category, confidence } \| null, duplicates: [candidate] }` | 400 bad file |
+| POST | `/issues/analyse` | S, A | multipart: `photo` (JPEG/PNG ≤ 5 MB), `lat?`, `lng?`, `locationId?` | `200 { suggestion: { category, confidence } \| null, duplicates: [candidate], ai }`; `ai` is `ready`, `loading`, `failed` or `disabled`; `suggestion` is null when AI is off, loading, failed or slower than `AI_TIMEOUT_MS` | 400 missing/bad photo, 403 technician |
 | GET | `/issues/duplicates` | S, A | `?lat&lng` or `?locationId`, `category?` | `200 { duplicates: [candidate] }` (no image ranking; category match + distance) | 400 |
 | POST | `/issues` | S, A | multipart: `photo` (required on mobile; optional on web), `title`, `description?`, `category`, `severity?`, `lat?`, `lng?`, `locationId?`, `landmark?` (required without GPS and location), `clientRequestId?` (uuid), `aiSuggestedCategory?`, `aiConfidence?` | `201 issue`; `200 issue` when the same `clientRequestId` was already received (idempotent retry) | 400, 401 |
 | GET | `/issues` | Any (scoped) | `?status=open,assigned&category&severity&building&from&to&q&sort=newest\|oldest\|priority&page&limit` | `200 page<issue summary>` | 400 |
@@ -112,7 +112,7 @@ Example login response:
 | POST | `/issues/:id/assign` | A | `{ technicianId, note? }` | `200 issue detail` | 400 inactive / not a technician, 404, 409 invalid transition |
 | POST | `/issues/:id/transition` | per D1 | JSON `{ to, note?, reason?, duplicateOf? }`, or multipart with `photo` when `to=resolved` | `200 issue detail` | 400 missing photo/reason, 403 not your job / not your report, 404, 409 not allowed from this status or reopen window expired |
 
-Duplicate `candidate`: `{ id, title, category, status, thumbPath, distanceM, similarity, supportersCount, createdAt, locationRef }` (no reporter).
+Duplicate `candidate`: `{ id, title, category, status, thumbPath, distanceM, similarity (null without image), supportersCount, supportedByMe, createdAt, locationRef }` (no reporter). Candidates: open/assigned/in progress/reopened issues from the last 7 days within `DUPLICATE_RADIUS_M` or in the same room, not reported by the caller, with image similarity ≥ `DUPLICATE_SIMILARITY` (same category +0.05); without an image, same-category issues only. Top 3.
 
 Transition targets (`to`): `in_progress`, `resolved`, `closed`, `reopened`, `rejected`. Assignment uses `/assign` (D1 row 1–2).
 
