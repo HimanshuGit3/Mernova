@@ -1,9 +1,13 @@
-import 'dotenv/config';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import dotenv from 'dotenv';
 import { z } from 'zod';
 
-const bool = z
-  .enum(['true', 'false', '1', '0'])
-  .transform((v) => v === 'true' || v === '1');
+const serverRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Real environment variables win over .env (dotenv never overrides them).
+dotenv.config({ path: path.join(serverRoot, '.env'), quiet: true });
+
+const bool = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1');
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -27,19 +31,31 @@ const schema = z.object({
   RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(20),
 });
 
+function fail(problems) {
+  // Fail fast (NFR-04): never start with a broken configuration.
+  console.error(`Invalid server configuration:\n${problems.join('\n')}\nSee server/.env.example`);
+  process.exit(1);
+}
+
 function load() {
   const parsed = schema.safeParse(process.env);
   if (!parsed.success) {
-    const problems = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`);
-    // Fail fast (NFR-04): never start with a broken configuration.
-    console.error(`Invalid server configuration:\n${problems.join('\n')}\nSee server/.env.example`);
-    process.exit(1);
+    fail(parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`));
   }
-  const env = parsed.data;
-  if (env.NODE_ENV === 'test' && env.MONGODB_URI_TEST) env.MONGODB_URI = env.MONGODB_URI_TEST;
+  const env = { ...parsed.data, SERVER_ROOT: serverRoot };
+  if (env.NODE_ENV === 'test') {
+    // Tests wipe their database, so they must never point at the development one.
+    if (!env.MONGODB_URI_TEST) fail(['  - MONGODB_URI_TEST: required when NODE_ENV=test']);
+    if (!/test/i.test(env.MONGODB_URI_TEST)) {
+      fail(['  - MONGODB_URI_TEST: database name must contain "test"']);
+    }
+    env.MONGODB_URI = env.MONGODB_URI_TEST;
+  }
+  env.UPLOAD_PATH = path.resolve(serverRoot, env.UPLOAD_DIR);
   return Object.freeze(env);
 }
 
 export const env = load();
 export const isDev = env.NODE_ENV === 'development';
 export const isTest = env.NODE_ENV === 'test';
+export const isProd = env.NODE_ENV === 'production';
