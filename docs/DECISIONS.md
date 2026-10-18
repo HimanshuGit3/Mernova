@@ -19,7 +19,6 @@ SPEC section 6 holds the main decisions (D1–D11). This file records every furt
 | D-13 | CSV export: max 5000 rows, UTF-8 BOM, CRLF, and cells starting with = + − @ are prefixed with a quote. | Excel compatibility and protection against CSV formula injection. |
 | D-14 | Day buckets for trends use the campus time zone (Asia/Kolkata). | "Resolved today" must match the wall clock at the booth, not UTC. |
 | D-15 | Seed photos are original SVG scenes (one per category, broken and fixed states) rendered by sharp; seed randomness is deterministic. | No stock photos (SPEC 8.1); repeatable demos and screenshots. |
-
 | D-16 | Web UI tests and screenshots run against an isolated seeded stack (`client/scripts/stack.mjs`: API :5055, DB `fixit_ui`, uploads `server/.cache/ui-uploads`, web :5174). | Repeatable runs that never touch the development database, uploads or ports. |
 | D-17 | Map tiles: OpenStreetMap standard tiles; dark mode inverts them with a CSS filter. | No API key and no second tile provider (SPEC 3). |
 | D-18 | Seeded resolved issues are kept inside the auto-close window (resolved < 72 h ago). | Otherwise the auto-close job closes them all at start-up and the demo loses its "confirm the fix" examples. |
