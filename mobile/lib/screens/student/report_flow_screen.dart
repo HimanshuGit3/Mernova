@@ -13,6 +13,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/chips.dart';
 import '../../widgets/common.dart';
 import '../common/issue_detail_screen.dart';
+import 'qr_scanner_screen.dart';
 import 'report_form.dart';
 
 enum _Step { photo, analysing, details, sending, done }
@@ -51,7 +52,7 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
   Future<void> _locate() async {
     setState(() => _location = const LocatingGps());
     final result = await _gps.current();
-    if (!mounted) return;
+    if (!mounted || _location is RoomScanned) return; // a scanned room beats GPS indoors (D9)
     setState(() {
       _location = switch (result) {
         GpsFix fix => GpsReady(fix),
@@ -136,6 +137,24 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
     }
   }
 
+  /// FR-53: scan the room sticker; the room's building, name and coordinates fill in.
+  Future<void> _scanRoom() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final room = await Navigator.of(context).push<LocationRef>(
+      MaterialPageRoute<LocationRef>(builder: (_) => const QrScannerScreen()),
+    );
+    if (room == null || !mounted) return;
+    setState(() {
+      _location = RoomScanned(id: room.id, code: room.code, building: room.building, label: room.label);
+      _analysedWithLocation = false;
+    });
+    messenger.showSnackBar(SnackBar(content: Text('Room ${room.code} added. Now snap the problem.')));
+    if (_photo != null && _step == _Step.details) {
+      await _analyse();
+      await _maybeShowDuplicates();
+    }
+  }
+
   Future<void> _changePhoto() async {
     final camera = await showModalBottomSheet<bool>(
       context: context,
@@ -198,7 +217,12 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
       body: AnimatedSwitcher(
         duration: Motion.normal,
         child: switch (_step) {
-          _Step.photo => _PhotoStep(key: const ValueKey('photo'), onPick: _pick),
+          _Step.photo => _PhotoStep(
+              key: const ValueKey('photo'),
+              onPick: _pick,
+              onScan: _scanRoom,
+              room: _location is RoomScanned ? (_location as RoomScanned).code : null,
+            ),
           _Step.analysing => _Analysing(key: const ValueKey('analysing'), photoPath: _photo),
           _Step.details || _Step.sending => Stack(
               key: const ValueKey('details'),
@@ -237,8 +261,12 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
 }
 
 class _PhotoStep extends StatelessWidget {
-  const _PhotoStep({super.key, required this.onPick});
+  const _PhotoStep({super.key, required this.onPick, required this.onScan, this.room});
   final void Function(bool camera) onPick;
+  final VoidCallback onScan;
+
+  /// Code of the scanned room, if any.
+  final String? room;
 
   @override
   Widget build(BuildContext context) {
@@ -260,6 +288,15 @@ class _PhotoStep extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _BigOption(icon: Icons.photo_library_rounded, title: 'Choose from gallery', subtitle: 'Pick a photo you already took', onTap: () => onPick(false)),
+        const SizedBox(height: 24),
+        Text('Indoors?', style: text.titleMedium),
+        const SizedBox(height: 8),
+        _BigOption(
+          icon: room == null ? Icons.qr_code_scanner_rounded : Icons.check_circle_rounded,
+          title: room == null ? 'Scan room QR' : 'Room $room added',
+          subtitle: room == null ? 'The sticker on the door fills in the exact room' : 'Tap to scan a different room',
+          onTap: onScan,
+        ),
       ],
     );
   }

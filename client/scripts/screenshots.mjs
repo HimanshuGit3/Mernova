@@ -106,6 +106,8 @@ async function routes() {
     },
     { role: 'admin', token: admin.token, name: 'map', path: '/map', waitMap: true },
     { role: 'admin', token: admin.token, name: 'users', path: '/users' },
+    { role: 'admin', token: admin.token, name: 'locations', path: '/locations' },
+    { role: 'admin', token: admin.token, name: 'qr-sheet', path: '/locations/print?building=Academic%20Block%20B', print: true },
     { role: 'technician', token: tech.token, name: 'jobs', path: '/jobs' },
     { role: 'technician', token: tech.token, name: 'job', path: `/jobs/${job.id}`, waitMap: true },
     { role: 'student', token: student.token, name: 'my-reports', path: '/my-reports' },
@@ -159,6 +161,7 @@ async function main() {
       : all;
     for (const route of selected) {
       for (const vp of VIEWPORTS) {
+        if (route.print && vp.name !== 'desktop') continue; // a printed A4 sheet has no phone layout
         for (const theme of THEMES) {
           const context = await browser.newContext({
             viewport: { width: vp.width, height: vp.height },
@@ -173,6 +176,7 @@ async function main() {
             [route.token ?? null, theme],
           );
           const page = await context.newPage();
+          if (route.print) await page.emulateMedia({ media: 'print' });
           await page.goto(`${WEB_URL}${route.path}`);
           await settle(page, route);
           if (route.action) {
