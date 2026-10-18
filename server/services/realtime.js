@@ -61,6 +61,11 @@ export function emitNotification(notification) {
   io?.to(rooms.user(notification.user)).emit('notification:new', notification);
 }
 
+/** Drop every live connection of a user (e.g. after deactivation). */
+export function disconnectUser(userId) {
+  io?.in(rooms.user(userId)).disconnectSockets(true);
+}
+
 /** `stats:changed` → admins, throttled to at most one emit per 2 s (trailing). */
 export function statsChanged() {
   if (!io) return;

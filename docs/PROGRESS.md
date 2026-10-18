@@ -8,7 +8,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - [x] Phase 1: Design documents
 - [x] Phase 2: Server foundation and auth
 - [x] Phase 3: Core domain API and seed data
-- [ ] Phase 4: Realtime, notifications and jobs
+- [x] Phase 4: Realtime, notifications and jobs
 - [ ] Phase 5: Web app (core) with the full design system
 - [ ] Phase 6: Mobile app (core)
 - [ ] Phase 7: AI triage and duplicate detection
@@ -35,6 +35,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - Phase 1: FR → endpoint mapping check: 26/26 functional requirements mapped, none missing.
 - Phase 2: `npm test -w server` 35/35 passed (2 files); `npm run lint -w server` clean.
 - Phase 3: `npm test -w server` 370/370 passed (6 files); lint clean; `npm run seed -w server` ran twice without errors (60 issues, 11 overdue).
+- Phase 4: `npm test -w server` 386/386 passed (8 files); `npm run e2e` 7/7 scenario steps (AI + image duplicate hooks pending phase 7); lint clean.
 
 ## Known issues
 

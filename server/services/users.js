@@ -2,6 +2,7 @@ import { User } from '../models/User.js';
 import { ApiError } from '../utils/ApiError.js';
 import { escapeRegex } from '../utils/text.js';
 import { openLoads } from './assignment.js';
+import { disconnectUser } from './realtime.js';
 
 export async function listUsers({ role, q, active, page, limit }) {
   const filter = {};
@@ -59,5 +60,6 @@ export async function updateUser(actor, id, patch) {
   }
   Object.assign(user, patch);
   await user.save();
+  if (patch.isActive === false) disconnectUser(user._id);
   return user;
 }
