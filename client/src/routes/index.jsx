@@ -1,5 +1,14 @@
 import { createBrowserRouter } from 'react-router';
-import { Briefcase, LayoutDashboard, ListChecks, MapPinned, QrCode, Users } from 'lucide-react';
+import {
+  BarChart3,
+  Briefcase,
+  LayoutDashboard,
+  ListChecks,
+  MapPinned,
+  QrCode,
+  Radio,
+  Users,
+} from 'lucide-react';
 import { RequireRole, Home } from './guards.jsx';
 import { AppShell } from '../components/layout/AppShell.jsx';
 import { StudentShell } from '../components/layout/StudentShell.jsx';
@@ -16,11 +25,15 @@ import { JobsPage } from '../pages/technician/JobsPage.jsx';
 import { NotFoundPage } from '../pages/NotFound.jsx';
 import { LocationsPage } from '../pages/locations/LocationsPage.jsx';
 import { PrintSheetPage } from '../pages/locations/PrintSheet.jsx';
+import { InsightsPage } from '../pages/insights/InsightsPage.jsx';
+import { LivePage } from '../pages/live/LivePage.jsx';
 
 export const ADMIN_NAV = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/issues', label: 'Issues', icon: ListChecks },
   { to: '/map', label: 'Map', icon: MapPinned },
+  { to: '/insights', label: 'Insights', icon: BarChart3 },
+  { to: '/live', label: 'Live', icon: Radio },
   { to: '/locations', label: 'Locations', icon: QrCode },
   { to: '/users', label: 'Users', icon: Users },
 ];
@@ -43,10 +56,12 @@ export const routes = [
           { path: '/map', element: <MapPage /> },
           { path: '/users', element: <UsersPage /> },
           { path: '/locations', element: <LocationsPage /> },
+          { path: '/insights', element: <InsightsPage /> },
         ],
       },
       // Outside the shell so the sheet prints without navigation chrome
       { path: '/locations/print', element: <PrintSheetPage /> },
+      { path: '/live', element: <LivePage /> },
     ],
   },
   {
