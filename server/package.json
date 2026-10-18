@@ -12,7 +12,7 @@
     "test:ai": "cross-env RUN_AI_SMOKE=1 vitest run tests/ai.smoke.test.js",
     "seed": "node scripts/seed.js --reset",
     "e2e": "node scripts/e2e.js",
-    "lint": "eslint ."
+    "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.1",
@@ -33,7 +33,11 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "cross-env": "^10.1.0",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.13.0",
     "socket.io-client": "^4.8.4",
     "supertest": "^7.3.1",
     "vitest": "^5.0.5"

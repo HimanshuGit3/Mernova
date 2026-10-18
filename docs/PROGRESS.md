@@ -6,7 +6,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 
 - [x] Phase 0: Environment check and scaffold
 - [x] Phase 1: Design documents
-- [ ] Phase 2: Server foundation and auth
+- [x] Phase 2: Server foundation and auth
 - [ ] Phase 3: Core domain API and seed data
 - [ ] Phase 4: Realtime, notifications and jobs
 - [ ] Phase 5: Web app (core) with the full design system
@@ -33,6 +33,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 
 - Phase 0: `npm run dev` starts API + web; `GET /api/health` → `{"status":"ok"}`; Vite page 200; client build + lint clean. `flutter analyze` not run (Flutter missing).
 - Phase 1: FR → endpoint mapping check: 26/26 functional requirements mapped, none missing.
+- Phase 2: `npm test -w server` 35/35 passed (2 files); `npm run lint -w server` clean.
 
 ## Known issues
 

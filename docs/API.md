@@ -15,8 +15,8 @@ Base URL: `/api` (development: `http://localhost:5000/api`, emulator: `http://10
   | Status | `code` | When |
   | --- | --- | --- |
   | 400 | `VALIDATION_ERROR`, `INVALID_FILE`, `FILE_TOO_LARGE` | zod validation failed, bad upload |
-  | 401 | `UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `TOKEN_EXPIRED` | missing/invalid token, wrong password |
-  | 403 | `FORBIDDEN`, `ACCOUNT_DISABLED` | wrong role, not allowed to perform this transition |
+  | 401 | `UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `TOKEN_EXPIRED`, `ACCOUNT_DISABLED` | missing/invalid/expired token, wrong password, token of a deactivated account (forces sign-out) |
+  | 403 | `FORBIDDEN`, `ACCOUNT_DISABLED` | wrong role, not allowed to perform this transition, login to a deactivated account |
   | 404 | `NOT_FOUND` | unknown route, or a resource the caller may not see |
   | 409 | `CONFLICT`, `INVALID_TRANSITION`, `DUPLICATE` | duplicate key, transition not allowed from the current status |
   | 429 | `RATE_LIMITED` | too many login/register attempts |
