@@ -85,10 +85,42 @@ const transitionBody = z.object({
   duplicateOf: blank(objectId.optional()),
 });
 
-export function issueRoutes({ extra } = {}) {
+const whereFields = {
+  lat: blank(z.coerce.number().min(-90).max(90).optional()),
+  lng: blank(z.coerce.number().min(-180).max(180).optional()),
+  locationId: blank(objectId.optional()),
+};
+const bothOrNeither = (b) => (b.lat === undefined) === (b.lng === undefined);
+
+const analyseBody = z
+  .object({ ...whereFields, category: blank(z.enum(CATEGORIES).optional()) })
+  .refine(bothOrNeither, { path: ['lng'], message: 'Send both lat and lng, or neither' });
+
+const duplicatesQuery = z
+  .object({ ...whereFields, category: blank(z.enum(CATEGORIES).optional()) })
+  .refine(bothOrNeither, { path: ['lng'], message: 'Send both lat and lng, or neither' })
+  .refine((q) => q.locationId || q.lat !== undefined, {
+    path: ['lat'],
+    message: 'Send a location (lat/lng or locationId)',
+  });
+
+export function issueRoutes() {
   const r = Router();
   r.use(auth);
-  extra?.(r); // phase 7 mounts /analyse and /duplicates here
+  // AI triage + duplicate check before a report is created (FR-51, FR-52)
+  r.post(
+    '/analyse',
+    requireRole('student', 'admin'),
+    photoUpload,
+    validate({ body: analyseBody }),
+    ctrl.analyse,
+  );
+  r.get(
+    '/duplicates',
+    requireRole('student', 'admin'),
+    validate({ query: duplicatesQuery }),
+    ctrl.duplicates,
+  );
   r.get('/', validate({ query: listQuery }), ctrl.list);
   r.get('/feed', validate({ query: feedQuery }), ctrl.feed);
   r.post(

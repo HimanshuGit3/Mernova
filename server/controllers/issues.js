@@ -1,9 +1,34 @@
 import * as issues from '../services/issues.js';
+import { analyseImage, aiStatus } from '../services/ai.js';
+import { findDuplicates } from '../services/duplicates.js';
+import { normaliseImage } from '../services/storage.js';
 import { suggestTechnicians } from '../services/assignment.js';
 import { pageOf } from '../utils/paginate.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Issue } from '../models/Issue.js';
 import { scopeFilter } from '../services/issues.js';
+
+/** Photo → AI category suggestion + duplicate candidates, before anything is saved. */
+export async function analyse(req, res) {
+  if (!req.file) {
+    throw ApiError.badRequest('Add a photo to analyse', [{ path: 'photo', message: 'Required' }]);
+  }
+  const buffer = await normaliseImage(req.file.buffer);
+  const { suggestion, embedding } = await analyseImage(buffer);
+  const where = req.valid.body;
+  const duplicates = await findDuplicates({
+    ...where,
+    embedding,
+    category: suggestion?.category ?? where.category,
+    viewerId: req.user._id,
+  });
+  res.json({ suggestion, duplicates, ai: aiStatus() });
+}
+
+/** Duplicate candidates without a photo (location + category only). */
+export async function duplicates(req, res) {
+  res.json({ duplicates: await findDuplicates({ ...req.valid.query, viewerId: req.user._id }) });
+}
 
 export async function create(req, res) {
   const { issue, created } = await issues.createIssue(req.user, req.body, req.file);
