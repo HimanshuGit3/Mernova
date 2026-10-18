@@ -22,7 +22,11 @@ test('Live Booth updates without reload when an issue is created via the API', a
   form.set('severity', 'high');
   form.set('lat', '13.1718');
   form.set('lng', '77.5362');
-  const res = await fetch(`${API_URL}/issues`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form });
+  const res = await fetch(`${API_URL}/issues`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
   expect(res.status).toBe(201);
 
   // the feed shows the new report and the counter goes up, with no reload

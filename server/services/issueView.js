@@ -93,7 +93,6 @@ export function toSummary(issue, viewer = null, now = new Date()) {
 /** Detail view: summary + history + the actions this viewer can take now. */
 export function toDetail(issue, viewer, now = new Date()) {
   const out = toSummary(issue, viewer, now);
-  const staffViewer = viewer?.role === 'admin' || viewer?.role === 'technician';
   const viewerId = String(viewer._id);
   out.statusHistory = (issue.statusHistory ?? []).map((h) => {
     let changedBy = 'system';
@@ -101,8 +100,13 @@ export function toDetail(issue, viewer, now = new Date()) {
       const p = h.changedBy;
       const id = idOf(p);
       const role = typeof p === 'object' && 'role' in p ? p.role : undefined;
-      if (staffViewer || id === viewerId) changedBy = { id, name: p.name, role };
-      else changedBy = { role };
+      // Names: admins see everyone; technicians see staff names only (never the reporter's,
+      // D-11); students see only their own name. Everyone else is shown by role.
+      const showName =
+        id === viewerId ||
+        viewer.role === 'admin' ||
+        (viewer.role === 'technician' && (role === 'admin' || role === 'technician'));
+      changedBy = showName ? { id, name: p.name, role } : { role };
     }
     return { status: h.status, changedBy, at: h.at, note: h.note };
   });

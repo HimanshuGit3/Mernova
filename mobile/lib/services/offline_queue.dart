@@ -10,9 +10,12 @@ import 'issues_service.dart';
 
 /// A report waiting to be sent (FR-58). Holds only what is needed to send it (NFR-08).
 class QueuedReport {
-  QueuedReport({required this.report, required this.queuedAt, this.attempts = 0, this.nextAttemptAt, this.lastError});
+  QueuedReport({required this.report, required this.queuedAt, this.ownerId, this.attempts = 0, this.nextAttemptAt, this.lastError});
 
   final NewReport report;
+
+  /// The user who queued it; only that user's session sends it (never filed under someone else).
+  final String? ownerId;
   final DateTime queuedAt;
   int attempts;
   DateTime? nextAttemptAt;
@@ -22,6 +25,7 @@ class QueuedReport {
 
   Map<String, dynamic> toJson() => {
         'report': report.toJson(),
+        'ownerId': ownerId,
         'queuedAt': queuedAt.toIso8601String(),
         'attempts': attempts,
         'nextAttemptAt': nextAttemptAt?.toIso8601String(),
@@ -30,6 +34,7 @@ class QueuedReport {
 
   static QueuedReport fromJson(Map<String, dynamic> j) => QueuedReport(
         report: NewReport.fromJson(Map<String, dynamic>.from(j['report'] as Map<dynamic, dynamic>)),
+        ownerId: j['ownerId'] as String?,
         queuedAt: DateTime.parse(j['queuedAt'] as String),
         attempts: (j['attempts'] as num?)?.toInt() ?? 0,
         nextAttemptAt: j['nextAttemptAt'] is String ? DateTime.parse(j['nextAttemptAt'] as String) : null,
@@ -126,6 +131,11 @@ class OfflineQueue extends ChangeNotifier {
   List<QueuedReport> get items => List.unmodifiable(_items);
   int get pending => _items.length;
 
+  /// Reports this user may see and send (their own, plus legacy ones without an owner).
+  List<QueuedReport> itemsFor(String? ownerId) =>
+      _items.where((q) => q.ownerId == null || q.ownerId == ownerId).toList(growable: false);
+  int pendingFor(String? ownerId) => itemsFor(ownerId).length;
+
   /// 5 s, 10 s, 20 s, 40 s … capped at 5 minutes.
   static Duration defaultBackoff(int attempt) =>
       Duration(seconds: math.min(300, 5 * math.pow(2, math.max(0, attempt - 1)).toInt()));
@@ -145,17 +155,18 @@ class OfflineQueue extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> add(NewReport report) async {
+  Future<void> add(NewReport report, {String? ownerId}) async {
     final kept = await storage.keepPhoto(report.photoPath, report.clientRequestId);
     final stored = NewReport.fromJson({...report.toJson(), 'photoPath': kept});
     _items.removeWhere((q) => q.id == stored.clientRequestId);
-    _items.add(QueuedReport(report: stored, queuedAt: clock()));
+    _items.add(QueuedReport(report: stored, queuedAt: clock(), ownerId: ownerId));
     await _persist();
     notifyListeners();
   }
 
   /// Try every report that is due. Safe to call often (it never runs twice at once).
-  Future<FlushResult> flush({bool force = false}) async {
+  /// [ownerId]: the signed-in user; other users' reports wait for their owner to sign in.
+  Future<FlushResult> flush({bool force = false, String? ownerId}) async {
     if (_flushing) return const FlushResult();
     _flushing = true;
     var sent = 0;
@@ -163,6 +174,7 @@ class OfflineQueue extends ChangeNotifier {
     final dropped = <QueuedReport>[];
     try {
       for (final item in List<QueuedReport>.of(_items)) {
+        if (item.ownerId != null && item.ownerId != ownerId) continue;
         final due = item.nextAttemptAt;
         if (!force && due != null && due.isAfter(clock())) {
           retrying += 1;

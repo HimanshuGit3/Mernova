@@ -261,11 +261,20 @@ export async function supportIssue(student, id) {
   if (idOf(issue.reportedBy) === String(student._id)) {
     throw ApiError.conflict('You reported this issue');
   }
-  const already = issue.supporters.some((s) => idOf(s) === String(student._id));
-  if (!already) {
-    issue.supporters.push(student._id);
+  // Atomic and idempotent: only the request that actually adds the supporter continues,
+  // so a double tap cannot add the same student twice or notify twice.
+  const added = await Issue.updateOne(
+    { _id: issue._id, status: { $in: ACTIVE_STATUSES }, supporters: { $ne: student._id } },
+    { $addToSet: { supporters: student._id } },
+  );
+  if (added.modifiedCount === 1) {
+    const fresh = await Issue.findById(issue._id).select('supporters');
+    issue.supporters = fresh.supporters;
     refreshSla(issue);
-    await issue.save();
+    await Issue.updateOne(
+      { _id: issue._id },
+      { $set: { priorityScore: issue.priorityScore, escalatedAt: issue.escalatedAt } },
+    );
     await notify([idOf(issue.reportedBy)], {
       type: 'me_too',
       title: 'Someone else has this problem too',

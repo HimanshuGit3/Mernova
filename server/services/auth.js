@@ -29,7 +29,16 @@ export async function login({ email, password }) {
   return { token: signToken(user), user };
 }
 
+/**
+ * A device token belongs to one phone, so it can belong to one account at a time: move it off
+ * any previous account (e.g. student A signed out without the app reaching the server, then
+ * student B signed in on the same phone) so A's pushes never reach B.
+ */
 export async function addFcmToken(userId, token) {
+  await User.updateMany(
+    { _id: { $ne: userId }, fcmTokens: token },
+    { $pull: { fcmTokens: token } },
+  );
   await User.updateOne({ _id: userId }, { $addToSet: { fcmTokens: token } });
 }
 

@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/session.dart';
 import '../services/biometric_service.dart';
 import '../services/offline_queue.dart';
 import '../theme/tokens.dart';
@@ -46,7 +47,7 @@ class OfflineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final online = context.watch<ConnectivityStatus>().online;
-    final pending = context.watch<OfflineQueue>().pending;
+    final pending = context.watch<OfflineQueue>().pendingFor(context.watch<Session>().user?.id);
     if (online && pending == 0) return const SizedBox.shrink();
     final text = !online
         ? (pending > 0 ? "You're offline · $pending ${pending == 1 ? 'report' : 'reports'} waiting to send" : "You're offline · reports will be saved and sent later")
@@ -56,7 +57,7 @@ class OfflineBanner extends StatelessWidget {
       child: Material(
         color: online ? StatusColors.open : Brand.navy700,
         child: InkWell(
-          onTap: online ? () => context.read<OfflineQueue>().flush(force: true) : null,
+          onTap: online ? () => context.read<OfflineQueue>().flush(force: true, ownerId: context.read<Session>().user?.id) : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
@@ -87,6 +88,7 @@ class DeviceSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     final bio = context.watch<BiometricService>();
     final queue = context.watch<OfflineQueue>();
+    final mine = queue.itemsFor(context.watch<Session>().user?.id);
     final text = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,10 +116,10 @@ class DeviceSettings extends StatelessWidget {
             );
           },
         ),
-        if (queue.pending > 0) ...[
+        if (mine.isNotEmpty) ...[
           const SizedBox(height: 12),
           Text('Waiting to send', style: text.titleMedium),
-          for (final q in queue.items)
+          for (final q in mine)
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.schedule_send_rounded),
@@ -125,7 +127,7 @@ class DeviceSettings extends StatelessWidget {
               subtitle: Text(q.attempts == 0 ? 'Will send when online' : 'Tried ${q.attempts}× · retrying automatically'),
             ),
           TextButton.icon(
-            onPressed: () => queue.flush(force: true),
+            onPressed: () => queue.flush(force: true, ownerId: context.read<Session>().user?.id),
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Try sending now'),
           ),

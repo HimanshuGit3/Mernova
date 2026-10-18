@@ -10,12 +10,16 @@ dotenv.config({ path: path.join(serverRoot, '.env'), quiet: true });
 const bool = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1');
 
 const schema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  // Safe default: without an explicit NODE_ENV the server behaves as production (no stack traces).
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('production'),
   PORT: z.coerce.number().int().min(0).default(5000),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   MONGODB_URI_TEST: z.string().optional(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
-  JWT_EXPIRES_IN: z.string().default('7d'),
+  JWT_EXPIRES_IN: z
+    .string()
+    .regex(/^\d+\s*(ms|s|m|h|d|w|y)?$/i, 'Use a duration like 7d, 12h or 3600')
+    .default('7d'),
   CLIENT_ORIGIN: z.string().min(1, 'CLIENT_ORIGIN is required'),
   UPLOAD_DIR: z.string().default('uploads'),
   SEED_PASSWORD: z.string().optional(),
@@ -37,22 +41,33 @@ function fail(problems) {
   process.exit(1);
 }
 
-function load() {
-  const parsed = schema.safeParse(process.env);
+/**
+ * Validate a set of variables. Pure (no exit), so it can be unit-tested.
+ * @returns {{ env?: object, problems: string[] }}
+ */
+export function parseEnv(source) {
+  const parsed = schema.safeParse(source);
   if (!parsed.success) {
-    fail(parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`));
+    return { problems: parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`) };
   }
   const env = { ...parsed.data, SERVER_ROOT: serverRoot };
   if (env.NODE_ENV === 'test') {
     // Tests wipe their database, so they must never point at the development one.
-    if (!env.MONGODB_URI_TEST) fail(['  - MONGODB_URI_TEST: required when NODE_ENV=test']);
+    if (!env.MONGODB_URI_TEST)
+      return { problems: ['  - MONGODB_URI_TEST: required when NODE_ENV=test'] };
     if (!/test/i.test(env.MONGODB_URI_TEST)) {
-      fail(['  - MONGODB_URI_TEST: database name must contain "test"']);
+      return { problems: ['  - MONGODB_URI_TEST: database name must contain "test"'] };
     }
     env.MONGODB_URI = env.MONGODB_URI_TEST;
   }
   env.UPLOAD_PATH = path.resolve(serverRoot, env.UPLOAD_DIR);
-  return Object.freeze(env);
+  return { env: Object.freeze(env), problems: [] };
+}
+
+function load() {
+  const { env, problems } = parseEnv(process.env);
+  if (problems.length) fail(problems);
+  return env;
 }
 
 export const env = load();
