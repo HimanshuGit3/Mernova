@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Debug builds only (D8): the development API is plain HTTP on the laptop
+         (10.0.2.2 from the emulator or the laptop's LAN IP from a phone).
+         Release builds keep Android's default: HTTPS only. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application android:usesCleartextTraffic="true" />
+</manifest>
