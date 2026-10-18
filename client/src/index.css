@@ -147,3 +147,15 @@
   font-family: var(--font-sans);
   background: var(--surface-2);
 }
+
+/* Dark map: invert OpenStreetMap tiles so the map matches the theme. */
+.map-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border-radius: 12px;
+}
+.leaflet-control-attribution {
+  font-size: 10px;
+}
