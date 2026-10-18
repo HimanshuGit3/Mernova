@@ -1,0 +1,200 @@
+# FixIt Campus — manual API requests (VS Code "REST Client" or JetBrains HTTP client).
+# Run `npm run seed -w server` first. Password for every seed account: SEED_PASSWORD (default FixIt@2026).
+
+@base = http://localhost:5000/api
+@password = FixIt@2026
+
+### Health
+GET {{base}}/health
+
+### Log in as admin
+# @name adminLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@fixit.campus", "password": "{{password}}" }
+
+###
+@admin = {{adminLogin.response.body.token}}
+
+### Log in as student (Asha)
+# @name studentLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "asha@student.fixit.campus", "password": "{{password}}" }
+
+###
+@student = {{studentLogin.response.body.token}}
+
+### Log in as technician (Ravi)
+# @name techLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "ravi.tech@fixit.campus", "password": "{{password}}" }
+
+###
+@tech = {{techLogin.response.body.token}}
+
+### Register a new student (role in the body is ignored)
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "name": "New Student", "email": "new.student@student.fixit.campus", "password": "password123", "role": "admin" }
+
+### Me
+GET {{base}}/auth/me
+Authorization: Bearer {{student}}
+
+### My reports (student scope)
+GET {{base}}/issues?limit=10
+Authorization: Bearer {{student}}
+
+### Technician jobs by priority
+GET {{base}}/issues?sort=priority
+Authorization: Bearer {{tech}}
+
+### Admin: filter issues
+GET {{base}}/issues?status=open,reopened&severity=high,critical&sort=priority&page=1&limit=20
+Authorization: Bearer {{admin}}
+
+### Admin: search
+GET {{base}}/issues?q=projector
+Authorization: Bearer {{admin}}
+
+### Report an issue with a typed location (web, no photo)
+# Replace locationId with an id from GET /locations
+POST {{base}}/issues
+Authorization: Bearer {{student}}
+Content-Type: multipart/form-data; boundary=----fixit
+
+------fixit
+Content-Disposition: form-data; name="title"
+
+Projector flickering in B-204
+------fixit
+Content-Disposition: form-data; name="category"
+
+electrical
+------fixit
+Content-Disposition: form-data; name="severity"
+
+high
+------fixit
+Content-Disposition: form-data; name="landmark"
+
+Second floor, next to the lift
+------fixit--
+
+### Issue detail (replace the id)
+GET {{base}}/issues/REPLACE_ID
+Authorization: Bearer {{admin}}
+
+### Smart assignment suggestions
+GET {{base}}/issues/REPLACE_ID/assignment-suggestions
+Authorization: Bearer {{admin}}
+
+### Assign
+POST {{base}}/issues/REPLACE_ID/assign
+Authorization: Bearer {{admin}}
+Content-Type: application/json
+
+{ "technicianId": "REPLACE_TECH_ID" }
+
+### Technician starts work
+POST {{base}}/issues/REPLACE_ID/transition
+Authorization: Bearer {{tech}}
+Content-Type: application/json
+
+{ "to": "in_progress" }
+
+### Reporter confirms the fix
+POST {{base}}/issues/REPLACE_ID/transition
+Authorization: Bearer {{student}}
+Content-Type: application/json
+
+{ "to": "closed" }
+
+### Reporter reopens (reason required, within 7 days)
+POST {{base}}/issues/REPLACE_ID/transition
+Authorization: Bearer {{student}}
+Content-Type: application/json
+
+{ "to": "reopened", "reason": "Still flickering" }
+
+### Admin rejects as duplicate
+POST {{base}}/issues/REPLACE_ID/transition
+Authorization: Bearer {{admin}}
+Content-Type: application/json
+
+{ "to": "rejected", "reason": "Duplicate report", "duplicateOf": "REPLACE_OTHER_ID" }
+
+### Me too
+POST {{base}}/issues/REPLACE_ID/support
+Authorization: Bearer {{student}}
+
+### Fixed on campus feed
+GET {{base}}/issues/feed
+Authorization: Bearer {{student}}
+
+### Locations
+GET {{base}}/locations?limit=50
+Authorization: Bearer {{student}}
+
+### Location by QR content
+GET {{base}}/locations/code/FIXIT:LOC:B-204
+Authorization: Bearer {{student}}
+
+### Create a location
+POST {{base}}/locations
+Authorization: Bearer {{admin}}
+Content-Type: application/json
+
+{ "code": "A-999", "building": "Academic Block A", "floor": "9", "room": "999", "label": "Rooftop", "lat": 13.1725, "lng": 77.5355 }
+
+### Notifications
+GET {{base}}/notifications
+Authorization: Bearer {{student}}
+
+### Mark all read
+POST {{base}}/notifications/read-all
+Authorization: Bearer {{student}}
+
+### Users (admin)
+GET {{base}}/users?role=technician
+Authorization: Bearer {{admin}}
+
+### Create a technician
+POST {{base}}/users
+Authorization: Bearer {{admin}}
+Content-Type: application/json
+
+{ "name": "Kiran Rao", "email": "kiran.tech@fixit.campus", "password": "password123", "role": "technician", "skills": ["plumbing"] }
+
+### Insights
+GET {{base}}/insights/summary
+Authorization: Bearer {{admin}}
+
+###
+GET {{base}}/insights/overview?days=30
+Authorization: Bearer {{admin}}
+
+###
+GET {{base}}/insights/buildings
+Authorization: Bearer {{admin}}
+
+###
+GET {{base}}/insights/live
+Authorization: Bearer {{admin}}
+
+### CSV export
+GET {{base}}/export/issues.csv?status=closed
+Authorization: Bearer {{admin}}
+
+### Security: student on an admin endpoint → 403
+GET {{base}}/users
+Authorization: Bearer {{student}}
+
+### Security: no token → 401
+GET {{base}}/issues
