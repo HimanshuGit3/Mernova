@@ -280,7 +280,7 @@ export function IssuesPage() {
         ) : (
           <>
             {/* Table from md up */}
-            <div className="hidden max-h-[calc(100dvh-280px)] overflow-auto md:block">
+            <div className="relative hidden max-h-[calc(100dvh-280px)] overflow-auto md:block">
               <table className="w-full border-separate border-spacing-0 text-left text-sm">
                 <caption className="sr-only">Issues</caption>
                 <thead className="sticky top-0 z-10 bg-surface">
