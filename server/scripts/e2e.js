@@ -105,7 +105,7 @@ function waitFor(socket, event, predicate = () => true, ms = 5000) {
 await connectDb(env.MONGODB_URI);
 await mongoose.connection.dropDatabase();
 await Promise.all(Object.values(mongoose.models).map((m) => m.syncIndexes()));
-extras.installFakeAi?.();
+await extras.installFakeAi();
 
 const PASSWORD = 'e2e-password-123';
 async function staff(name, email, role, skills = []) {
@@ -126,7 +126,7 @@ const room = await Location.create({
   point: { type: 'Point', coordinates: [env.CAMPUS_CENTER_LNG, env.CAMPUS_CENTER_LAT] },
 });
 
-const app = await startServer({ port: 0, jobs: false });
+const app = await startServer({ port: 0, jobs: false, ai: false });
 base = `http://127.0.0.1:${app.port}`;
 console.log(
   `${C.bold}FixIt Campus e2e${C.reset} ${C.dim}API on ${base}, database ${env.MONGODB_URI}${C.reset}\n`,
@@ -181,16 +181,11 @@ try {
       assert.equal(loc.status, 200);
       assert.equal(loc.body.id, String(room._id));
       state.photo = await photoBlob('electrical', 3);
-      const suggestion = await extras.analyse?.(
-        call,
-        state.student.token,
-        state.photo,
-        loc.body.id,
-      );
-      if (suggestion) {
-        assert.equal(suggestion.suggestion?.category, 'electrical', 'AI suggests electrical');
-        assert.equal(suggestion.duplicates.length, 0, 'no duplicate yet');
-      }
+      await extras.teach(state.photo, 'electrical');
+      await extras.teach(await photoBlob('plumbing', 5), 'plumbing');
+      const suggestion = await extras.analyse(call, state.student.token, state.photo, loc.body.id);
+      assert.equal(suggestion.suggestion?.category, 'electrical', 'AI suggests electrical');
+      assert.equal(suggestion.duplicates.length, 0, 'no duplicate yet');
       const res = await call('POST', '/issues', {
         token: state.student.token,
         form: {
@@ -345,12 +340,12 @@ try {
       const token2 = second.body.token;
       const countBefore = (await call('GET', '/issues?limit=50', { token: state.admin.token })).body
         .total;
-      const dup = (await extras.findDuplicates?.(
+      const dup = await extras.findDuplicates(
         call,
         token2,
         await photoBlob('plumbing', 6),
         String(room._id),
-      )) ?? { duplicates: [{ id: leak.body.id }] };
+      );
       assert.ok(
         dup.duplicates.some((d) => d.id === leak.body.id),
         'the existing leak is offered as a duplicate',

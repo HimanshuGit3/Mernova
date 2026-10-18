@@ -11,7 +11,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - [x] Phase 4: Realtime, notifications and jobs
 - [x] Phase 5: Web app (core) with the full design system
 - [ ] Phase 6: Mobile app (core) — **code complete; checks pending Flutter install** (analyze, test, APK, emulator QA)
-- [ ] Phase 7: AI triage and duplicate detection
+- [x] Phase 7: AI triage and duplicate detection (server + web verified; mobile part pending Flutter)
 - [ ] Phase 8: QR scan-to-report
 - [ ] Phase 9: Insights, Live Booth and transparency
 - [ ] Phase 10: Mobile delight and push
@@ -38,6 +38,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - Phase 4: `npm test -w server` 386/386 passed (8 files); `npm run e2e` 7/7 scenario steps (AI + image duplicate hooks pending phase 7); lint clean.
 - Phase 5: client lint clean, build ok, `npm run test:ui -w client` 9/9 passed; 64 web screenshots reviewed, all findings fixed.
 - Phase 6: mobile code written (26 Dart files, 10 tests); static import check passed. `flutter analyze` / `flutter test` / `flutter build apk --debug` / emulator QA NOT RUN (Flutter + Android SDK missing).
+- Phase 7: server 403 passed + 1 skipped (real-model smoke passes via `npm run test:ai`), e2e 7/7 (fake and real CLIP), client lint/build/test:ui 9/9, 68 screenshots with no overflow. Mobile AI screens written, not yet analysed.
 
 ## Known issues
 

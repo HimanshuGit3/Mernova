@@ -329,3 +329,52 @@ class Paged<T> {
         total: _int(j['total']),
       );
 }
+
+class DuplicateCandidate {
+  const DuplicateCandidate({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.status,
+    this.thumbPath,
+    this.distanceM = 0,
+    this.similarity,
+    this.supportersCount = 0,
+    this.supportedByMe = false,
+  });
+
+  final String id;
+  final String title;
+  final String category;
+  final String status;
+  final String? thumbPath;
+  final int distanceM;
+  final double? similarity;
+  final int supportersCount;
+  final bool supportedByMe;
+
+  factory DuplicateCandidate.fromJson(Json j) => DuplicateCandidate(
+        id: _str(j['id']) ?? '',
+        title: _str(j['title']) ?? '',
+        category: _str(j['category']) ?? 'other',
+        status: _str(j['status']) ?? 'open',
+        thumbPath: _str(j['thumbPath']),
+        distanceM: _int(j['distanceM']),
+        similarity: _double(j['similarity']),
+        supportersCount: _int(j['supportersCount']),
+        supportedByMe: j['supportedByMe'] == true,
+      );
+}
+
+/// Result of POST /issues/analyse: AI suggestion (may be null) + duplicate candidates.
+class Analysis {
+  const Analysis({this.suggestion, this.duplicates = const []});
+
+  final AiSuggestion? suggestion;
+  final List<DuplicateCandidate> duplicates;
+
+  factory Analysis.fromJson(Json j) => Analysis(
+        suggestion: AiSuggestion.fromJson(_map(j['suggestion'])),
+        duplicates: _maps(j['duplicates']).map(DuplicateCandidate.fromJson).toList(),
+      );
+}

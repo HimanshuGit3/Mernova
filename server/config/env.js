@@ -25,7 +25,7 @@ const schema = z.object({
   AI_MODEL_ID: z.string().default('Xenova/clip-vit-base-patch32'),
   AI_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
   DUPLICATE_RADIUS_M: z.coerce.number().positive().default(50),
-  DUPLICATE_SIMILARITY: z.coerce.number().min(0).max(1).default(0.85),
+  DUPLICATE_SIMILARITY: z.coerce.number().min(0).max(1).default(0.88),
   AUTO_CLOSE_HOURS: z.coerce.number().positive().default(72),
   FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
   RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(20),

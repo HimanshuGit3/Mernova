@@ -57,7 +57,7 @@ export function FixedFeedPage({ embedded = false }) {
         />
       ) : null}
       {loading && items.length === 0 ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-80 rounded-[var(--radius-card)]" />
           ))}
@@ -76,7 +76,7 @@ export function FixedFeedPage({ embedded = false }) {
         </Card>
       ) : (
         <>
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item, i) => (
               <motion.li key={item.id} {...stagger(i)}>
                 <Card as="article" className="flex h-full flex-col overflow-hidden">

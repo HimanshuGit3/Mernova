@@ -431,7 +431,7 @@ export function IssueDetailPage({ backTo = '/issues', backLabel = 'All issues' }
 
   if (res.loading && !res.data) {
     return (
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-4 lg:col-span-2">
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="aspect-[4/3] w-full rounded-[var(--radius-card)]" />
@@ -492,7 +492,7 @@ export function IssueDetailPage({ backTo = '/issues', backLabel = 'All issues' }
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* On mobile the left column dissolves (contents) so actions come right after the photo. */}
         <div className="contents lg:col-span-2 lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
           <Card className="order-1 min-w-0 overflow-hidden lg:order-none">

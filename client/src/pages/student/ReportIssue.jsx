@@ -11,7 +11,8 @@ import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Field, Input, Segmented, Select, Textarea } from '../../components/ui/Field.jsx';
 import { CATEGORY, CATEGORY_ORDER, SEVERITY, SEVERITY_ORDER } from '../../theme/meta.js';
-import { AiSuggestion } from './AiSuggestion.jsx';
+import { AiSuggestion, DuplicatesPanel } from './AiSuggestion.jsx';
+import { useAnalysis } from './useAnalysis.js';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -84,7 +85,8 @@ export function ReportIssuePage() {
     description: '',
   });
   const [photo, setPhoto] = useState(null);
-  const [ai, setAi] = useState(null);
+  const analysis = useAnalysis(photo, form.locationId);
+  const ai = analysis.suggestion;
   const [errors, setErrors] = useState({});
   const [progress, setProgress] = useState(null);
   const [created, setCreated] = useState(null);
@@ -168,7 +170,6 @@ export function ReportIssuePage() {
                   description: '',
                 });
                 setPhoto(null);
-                setAi(null);
               }}
             >
               Report another
@@ -186,7 +187,11 @@ export function ReportIssuePage() {
         title="Report an issue"
         subtitle="Tell us what is wrong and where. On your phone you can also scan the room's QR sticker."
       />
-      <form onSubmit={submit} noValidate className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <form
+        onSubmit={submit}
+        noValidate
+        className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
+      >
         <Card className="flex flex-col gap-5 p-5 sm:p-6">
           <Field
             label="What is the problem?"
@@ -211,9 +216,8 @@ export function ReportIssuePage() {
             error={errors.category}
             labelAction={
               <AiSuggestion
-                photo={photo}
-                locationId={form.locationId}
-                onSuggestion={setAi}
+                analysing={analysis.analysing}
+                suggestion={analysis.suggestion}
                 onApply={(category) => setForm((f) => ({ ...f, category }))}
                 current={form.category}
               />
@@ -253,7 +257,7 @@ export function ReportIssuePage() {
               />
             )}
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Building">
               {(id) => (
                 <Select
@@ -334,6 +338,10 @@ export function ReportIssuePage() {
               A photo helps the technician bring the right tools. AI suggests a category from it.
             </p>
           </Card>
+          <DuplicatesPanel
+            duplicates={analysis.duplicates}
+            onSupported={(d) => navigate(`/my-reports/${d.id}`)}
+          />
           <Card className="sticky top-20 p-5 sm:p-6">
             <AnimatePresence>
               {progress !== null ? (

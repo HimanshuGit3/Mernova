@@ -68,6 +68,22 @@ export async function saveImage(input, { now } = {}) {
   };
 }
 
+/** Decode and normalise an upload in memory (no file written), e.g. for AI analysis. */
+export async function normaliseImage(input) {
+  if (!sniffImageType(input)) {
+    throw ApiError.badRequest('Photo must be a JPEG or PNG image', undefined, 'INVALID_FILE');
+  }
+  try {
+    return await sharp(input, { failOn: 'error' })
+      .rotate()
+      .resize(MAX_SIDE, MAX_SIDE, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+  } catch {
+    throw ApiError.badRequest('Photo could not be read as an image', undefined, 'INVALID_FILE');
+  }
+}
+
 /** Resolve a public `/uploads/...` path to an absolute file path (or null if outside the upload dir). */
 export function absolutePathOf(publicPath) {
   if (!publicPath?.startsWith('/uploads/')) return null;

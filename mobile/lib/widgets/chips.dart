@@ -151,3 +151,28 @@ class _SlaChipState extends State<SlaChip> {
     return Pill(label: s.label, color: s.color, icon: s.icon, semanticsLabel: 'SLA: ${s.label}');
   }
 }
+
+/// FR-51: the AI's suggested category with its confidence; tap to apply it.
+class AiChip extends StatelessWidget {
+  const AiChip({super.key, required this.suggestion, required this.onApply});
+
+  final AiSuggestion suggestion;
+  final VoidCallback onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (suggestion.confidence * 100).round();
+    final label = Meta.category(suggestion.category);
+    return Semantics(
+      button: true,
+      label: 'AI suggests $label with $pct percent confidence. Tap to use it.',
+      child: ExcludeSemantics(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999),
+          onTap: onApply,
+          child: Pill(label: 'AI: $label · $pct%', color: StatusColors.assigned, icon: Icons.auto_awesome_rounded),
+        ),
+      ),
+    );
+  }
+}
