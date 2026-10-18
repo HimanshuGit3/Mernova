@@ -6,6 +6,7 @@ import '../../config/env.dart';
 import '../../models/models.dart';
 import '../../providers/app_state.dart';
 import '../../providers/session.dart';
+import '../../services/push_service.dart';
 import '../../theme/meta.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/brand.dart';
@@ -158,8 +159,9 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 24),
         OutlinedButton.icon(
           onPressed: () async {
+            final token = context.read<PushService>().token; // so the server stops pushing to this phone
             context.read<NotificationsController>().clear();
-            await session.logout();
+            await session.logout(fcmToken: token);
           },
           icon: const Icon(Icons.logout_rounded),
           label: const Text('Sign out'),

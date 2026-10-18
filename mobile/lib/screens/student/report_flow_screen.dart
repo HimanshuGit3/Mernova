@@ -9,6 +9,7 @@ import '../../models/models.dart';
 import '../../services/api.dart';
 import '../../services/device_services.dart';
 import '../../services/issues_service.dart';
+import '../../services/offline_queue.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/chips.dart';
 import '../../widgets/common.dart';
@@ -39,6 +40,7 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
   Analysis? _analysis;
   bool _analysedWithLocation = false;
   bool _duplicateSheetShown = false;
+  bool _savedOffline = false;
 
   /// One id per report: retries of the same report can never create a second issue.
   final String _requestId = const Uuid().v4();
@@ -205,6 +207,18 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
       });
     } on ApiException catch (e) {
       if (!mounted) return;
+      if (OfflineQueue.isRetryable(e)) {
+        // FR-58: no signal (or the server is down) → keep it on the phone and send it later.
+        // The same clientRequestId is reused, so a report that did reach the server is never duplicated.
+        await context.read<OfflineQueue>().add(report);
+        await HapticFeedback.mediumImpact();
+        if (!mounted) return;
+        setState(() {
+          _savedOffline = true;
+          _step = _Step.done;
+        });
+        return;
+      }
       setState(() => _step = _Step.details);
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
     }
@@ -248,6 +262,7 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
               ],
             ),
           _Step.done => _Success(
+              offline: _savedOffline,
               key: const ValueKey('done'),
               onTrack: () => Navigator.of(context).pushReplacement(
                 MaterialPageRoute<void>(builder: (_) => IssueDetailScreen(issueId: _created!.id, preview: _created)),
@@ -393,7 +408,8 @@ class _UploadOverlay extends StatelessWidget {
 }
 
 class _Success extends StatelessWidget {
-  const _Success({super.key, required this.onTrack, required this.onDone});
+  const _Success({super.key, required this.onTrack, required this.onDone, this.offline = false});
+  final bool offline;
   final VoidCallback onTrack;
   final VoidCallback onDone;
 
@@ -421,15 +437,17 @@ class _Success extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Report sent!', style: text.headlineSmall),
+            Text(offline ? 'Saved on your phone' : 'Report sent!', style: text.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'The estate office sees it right now. We will notify you when a technician picks it up.',
+              offline
+                  ? 'No connection right now. Your report will be sent automatically as soon as you are back online.'
+                  : 'The estate office sees it right now. We will notify you when a technician picks it up.',
               textAlign: TextAlign.center,
               style: text.bodyLarge?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
-            FilledButton(onPressed: onTrack, child: const Text('Track this report')),
+            if (!offline) FilledButton(onPressed: onTrack, child: const Text('Track this report')),
             const SizedBox(height: 8),
             TextButton(onPressed: onDone, child: const Text('Back to home')),
           ],
