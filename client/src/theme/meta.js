@@ -23,13 +23,13 @@ export const SEVERITY = {
 export const SEVERITY_ORDER = Object.keys(SEVERITY);
 
 export const CATEGORY = {
-  electrical: { label: 'Electrical', icon: Zap, color: '#E0A030' },
+  electrical: { label: 'Electrical', icon: Zap, color: '#E0A030', colorDark: '#C0841C' },
   plumbing: { label: 'Plumbing', icon: Droplets, color: '#3B7BD0' },
-  furniture: { label: 'Furniture', icon: Armchair, color: '#9C6B3F' },
+  furniture: { label: 'Furniture', icon: Armchair, color: '#B5651D' },
   network: { label: 'Network', icon: Wifi, color: '#7C5CD6' },
   cleanliness: { label: 'Cleanliness', icon: Trash2, color: '#1F9E89' },
   safety: { label: 'Safety', icon: ShieldAlert, color: '#DC2626' },
-  other: { label: 'Other', icon: CircleHelp, color: '#64748B' },
+  other: { label: 'Other', icon: CircleHelp, color: '#D6409F' },
 };
 export const CATEGORY_ORDER = Object.keys(CATEGORY);
 
@@ -43,3 +43,13 @@ export const ACTION = {
   reopened: { label: 'Reopen' },
   rejected: { label: 'Reject' },
 };
+
+/**
+ * Category colour for charts. The categorical palette is validated (dataviz validator:
+ * lightness band, chroma, CVD and normal-vision separation) separately for each surface,
+ * so dark mode has its own amber step instead of an automatic flip.
+ */
+export function categoryColor(category, theme = 'light') {
+  const c = CATEGORY[category] ?? CATEGORY.other;
+  return theme === 'dark' && c.colorDark ? c.colorDark : c.color;
+}
