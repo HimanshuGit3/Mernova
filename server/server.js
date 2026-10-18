@@ -5,17 +5,29 @@ import { connectDb, disconnectDb } from './config/db.js';
 import { createApp } from './app.js';
 import { initSocket, closeSocket } from './services/socket.js';
 import { startJobs } from './jobs/index.js';
+import { setAiService } from './services/ai.js';
+import { createClipService } from './services/clip.js';
 
 /**
  * Start the API + Socket.IO on one HTTP server.
  * @param {{ port?: number, jobs?: boolean }} [options] port 0 picks a free port (used by e2e)
  */
-export async function startServer({ port = env.PORT, jobs = true } = {}) {
+export async function startServer({
+  port = env.PORT,
+  jobs = true,
+  ai = env.AI_TRIAGE_ENABLED,
+} = {}) {
   await connectDb();
   const app = createApp();
   const server = http.createServer(app);
   const io = initSocket(server);
   const stopJobs = jobs ? startJobs() : () => {};
+  if (ai) {
+    // CLIP loads in the background; until it is ready, reports simply get no suggestion.
+    const clip = createClipService();
+    setAiService(clip);
+    clip.warmup();
+  }
   await new Promise((resolve, reject) => {
     server.once('error', (err) => {
       stopJobs();
