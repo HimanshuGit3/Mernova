@@ -1,0 +1,32 @@
+node_modules/
+.env
+.env.local
+server/uploads/
+server/.cache/
+client/dist/
+client/test-results/
+client/playwright-report/
+client/blob-report/
+coverage/
+*.log
+# Flutter
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/debug/
+mobile/android/app/release/
+mobile/**/GeneratedPluginRegistrant.*
+mobile/android/gradlew
+mobile/android/gradlew.bat
+mobile/android/gradle/wrapper/gradle-wrapper.jar
+# Secrets
+google-services.json
+*service-account*.json
+*-firebase-adminsdk-*.json
+.DS_Store
