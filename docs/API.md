@@ -161,7 +161,7 @@ Scope of `GET /issues` and `GET /issues/:id`: students see issues they reported 
 | GET | `/insights/live` | | Live Booth snapshot: counters, recent items, map points. **No personal data.** |
 | GET | `/export/issues.csv` | same filters as `GET /issues` | `text/csv` attachment |
 
-Building health score: `100 − 12 × overdue − 4 × open (max −60) + bonus for fast resolution`, clamped to 0–100 (see `services/insights.js`).
+Building health score (0–100, higher is healthier): `100 − 10 × overdue − min(45, 3 × open) − slow-fix penalty`, where the penalty is 1 point per 4 h of average resolution time above 24 h (max 20). See `healthScore` in `services/insights.js`.
 
 ## Static files
 
