@@ -45,11 +45,11 @@ abstract final class Meta {
   static const categoryColor = <String, Color>{
     'electrical': Color(0xFFE0A030),
     'plumbing': Color(0xFF3B7BD0),
-    'furniture': Color(0xFF9C6B3F),
+    'furniture': Color(0xFFB5651D),
     'network': Color(0xFF7C5CD6),
     'cleanliness': Color(0xFF1F9E89),
     'safety': Color(0xFFDC2626),
-    'other': Color(0xFF64748B),
+    'other': Color(0xFFD6409F),
   };
 
   static String status(String s) => statusLabel[s] ?? s;
