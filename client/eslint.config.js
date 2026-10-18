@@ -24,7 +24,8 @@ export default [
   },
   {
     files: ['tests/**/*.js', 'scripts/**/*.mjs', '*.config.js'],
-    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: globals.node },
+    // node scripts that also pass functions into the browser (page.waitForFunction, addInitScript)
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...globals.node, ...globals.browser } },
   },
   prettier,
 ];
