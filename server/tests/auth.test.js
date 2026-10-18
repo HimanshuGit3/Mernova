@@ -25,14 +25,12 @@ describe('health', () => {
 
 describe('POST /api/auth/register', () => {
   it('creates a student and returns a token without the password hash', async () => {
-    const res = await http
-      .post('/api/auth/register')
-      .send({
-        name: 'Asha Rao',
-        email: 'Asha@Student.edu',
-        password: 'password123',
-        department: 'MCA',
-      });
+    const res = await http.post('/api/auth/register').send({
+      name: 'Asha Rao',
+      email: 'Asha@Student.edu',
+      password: 'password123',
+      department: 'MCA',
+    });
     expect(res.status).toBe(201);
     expect(res.body.token).toBeTypeOf('string');
     expect(res.body.user).toMatchObject({
