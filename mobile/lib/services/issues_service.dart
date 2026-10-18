@@ -140,6 +140,10 @@ class IssuesService {
 
   Future<Issue> support(String id) async => Issue.fromJson(await api.post('/issues/$id/support'));
 
+  /// Look up a scanned room. Unknown or deactivated rooms throw ApiException(404).
+  Future<LocationRef> room(String code) async =>
+      LocationRef.fromJson(await api.get('/locations/code/${Uri.encodeComponent(code)}'));
+
   /// AI category suggestion + duplicate candidates for a photo, before reporting (FR-51/52).
   Future<Analysis> analyse({required String photoPath, double? lat, double? lng, String? locationId}) async {
     final form = FormData.fromMap({
