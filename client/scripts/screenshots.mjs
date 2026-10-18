@@ -26,6 +26,7 @@ const ACCOUNTS = {
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
+  { name: 'booth', width: 1920, height: 1080 }, // Live Booth screen (SPEC phase 9)
 ];
 const THEMES = ['light', 'dark'];
 
@@ -105,6 +106,8 @@ async function routes() {
       waitMap: true,
     },
     { role: 'admin', token: admin.token, name: 'map', path: '/map', waitMap: true },
+    { role: 'admin', token: admin.token, name: 'insights', path: '/insights', waitMap: true },
+    { role: 'admin', token: admin.token, name: 'live', path: '/live', waitMap: true, fullPage: false, viewports: ['booth', 'desktop', 'mobile'] },
     { role: 'admin', token: admin.token, name: 'users', path: '/users' },
     { role: 'admin', token: admin.token, name: 'locations', path: '/locations' },
     { role: 'admin', token: admin.token, name: 'qr-sheet', path: '/locations/print?building=Academic%20Block%20B', print: true },
@@ -162,6 +165,7 @@ async function main() {
     for (const route of selected) {
       for (const vp of VIEWPORTS) {
         if (route.print && vp.name !== 'desktop') continue; // a printed A4 sheet has no phone layout
+        if (!(route.viewports ?? ['desktop', 'mobile']).includes(vp.name)) continue;
         for (const theme of THEMES) {
           const context = await browser.newContext({
             viewport: { width: vp.width, height: vp.height },
