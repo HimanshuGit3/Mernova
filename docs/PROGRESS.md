@@ -13,7 +13,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - [ ] Phase 6: Mobile app (core) — **code complete; checks pending Flutter install** (analyze, test, APK, emulator QA)
 - [x] Phase 7: AI triage and duplicate detection (server + web verified; mobile part pending Flutter)
 - [x] Phase 8: QR scan-to-report (server + web verified; mobile scanner pending Flutter)
-- [ ] Phase 9: Insights, Live Booth and transparency
+- [x] Phase 9: Insights, Live Booth and transparency
 - [ ] Phase 10: Mobile delight and push
 - [ ] Phase 11: Hardening and delivery
 
@@ -40,6 +40,7 @@ Source of truth: `docs/SPEC.md`. Continue from the first unchecked item.
 - Phase 6: mobile code written (26 Dart files, 10 tests); static import check passed. `flutter analyze` / `flutter test` / `flutter build apk --debug` / emulator QA NOT RUN (Flutter + Android SDK missing).
 - Phase 7: server 403 passed + 1 skipped (real-model smoke passes via `npm run test:ai`), e2e 7/7 (fake and real CLIP), client lint/build/test:ui 9/9, 68 screenshots with no overflow. Mobile AI screens written, not yet analysed.
 - Phase 8: Playwright 10/10 (new: add room + printable sticker), server lookup/inactive tests pass, printed sheet + Locations screenshots reviewed, no overflow. Mobile scanner + QR parser test written, not run.
+- Phase 9: Playwright 11/11 (new: Live Booth updates on API create), lint/build clean, Insights + /live (1920×1080) screenshots reviewed, no overflow; chart palette validated.
 
 ## Known issues
 
