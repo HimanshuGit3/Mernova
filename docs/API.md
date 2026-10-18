@@ -107,7 +107,7 @@ Example login response:
 | GET | `/issues/feed` | Any | `?page&limit` | `200 page<feed item>`: resolved/closed issues with before/after photos, no reporter or assignee identity | |
 | GET | `/issues/:id` | Any (scoped) | | `200 issue detail` | 404 not visible |
 | PATCH | `/issues/:id` | A | `{ severity?, category?, title? }` | `200 issue detail` (SLA and priority recomputed) | 400, 404 |
-| POST | `/issues/:id/support` | S | | `200 issue summary` ("Me too": adds a supporter, notifies the reporter, raises priority). Idempotent. | 404, 409 own issue or terminal status |
+| POST | `/issues/:id/support` | S | | `200 issue detail` ("Me too": atomically adds the caller as a supporter, notifies the reporter once, raises priority; the supporter can then follow the issue without seeing the reporter). Idempotent. | 404, 409 own issue or terminal status |
 | GET | `/issues/:id/assignment-suggestions` | A | | `200 { suggestions: [{ id, name, skills, openLoad }] }` top 3 by workload (D3) | 404 |
 | POST | `/issues/:id/assign` | A | `{ technicianId, note? }` | `200 issue detail` | 400 inactive / not a technician, 404, 409 invalid transition |
 | POST | `/issues/:id/transition` | per D1 | JSON `{ to, note?, reason?, duplicateOf? }`, or multipart with `photo` when `to=resolved` | `200 issue detail` | 400 missing photo/reason, 403 not your job / not your report, 404, 409 not allowed from this status or reopen window expired |
