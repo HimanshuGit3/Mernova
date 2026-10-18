@@ -6,8 +6,11 @@ import { env, isDev } from './config/env.js';
 import { dbState } from './config/db.js';
 import { authLimiter } from './middleware/rateLimit.js';
 import { notFound, errorHandler } from './middleware/errors.js';
+import { aiStatus } from './services/ai.js';
 import { authRoutes } from './routes/auth.js';
 import { userRoutes } from './routes/users.js';
+import { issueRoutes } from './routes/issues.js';
+import { locationRoutes, notificationRoutes, insightRoutes, exportRoutes } from './routes/misc.js';
 
 export const allowedOrigins = env.CLIENT_ORIGIN.split(',').map((o) => o.trim());
 
@@ -36,10 +39,15 @@ export function createApp(options = {}) {
 
   const api = express.Router();
   api.get('/health', (_req, res) => {
-    res.json({ status: 'ok', db: dbState(), time: new Date().toISOString() });
+    res.json({ status: 'ok', db: dbState(), ai: aiStatus(), time: new Date().toISOString() });
   });
   api.use('/auth', authRoutes({ limiter: authLimiter({ max: options.authRateLimitMax }) }));
   api.use('/users', userRoutes());
+  api.use('/issues', issueRoutes());
+  api.use('/locations', locationRoutes());
+  api.use('/notifications', notificationRoutes());
+  api.use('/insights', insightRoutes());
+  api.use('/export', exportRoutes());
   app.use('/api', api);
 
   app.use(notFound);
