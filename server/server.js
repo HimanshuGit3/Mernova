@@ -7,6 +7,7 @@ import { initSocket, closeSocket } from './services/socket.js';
 import { startJobs } from './jobs/index.js';
 import { setAiService } from './services/ai.js';
 import { createClipService } from './services/clip.js';
+import { initPush } from './services/fcm.js';
 
 /**
  * Start the API + Socket.IO on one HTTP server.
@@ -22,6 +23,7 @@ export async function startServer({
   const server = http.createServer(app);
   const io = initSocket(server);
   const stopJobs = jobs ? startJobs() : () => {};
+  await initPush(); // optional FCM; a no-op without FIREBASE_SERVICE_ACCOUNT
   if (ai) {
     // CLIP loads in the background; until it is ready, reports simply get no suggestion.
     const clip = createClipService();
