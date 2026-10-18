@@ -1,0 +1,149 @@
+@import 'tailwindcss';
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import '@fontsource/plus-jakarta-sans/800.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic design tokens (SPEC 8.1). Components only use these names. */
+:root {
+  --bg: #f5f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --text: #1a2233;
+  --muted: #5b667c;
+  --border: #dfe3ec;
+  --primary: #1b3260;
+  --primary-hover: #0f1f3d;
+  --primary-fg: #ffffff;
+  --ring: #c9962b;
+  --shadow-card: 0 1px 2px rgb(15 31 61 / 0.06), 0 4px 16px rgb(15 31 61 / 0.06);
+  --shadow-pop: 0 8px 32px rgb(15 31 61 / 0.16);
+  color-scheme: light;
+}
+.dark {
+  --bg: #0b1223;
+  --surface: #131d36;
+  --surface-2: #1a2646;
+  --text: #e8ecf6;
+  --muted: #9aa6c3;
+  --border: #26345a;
+  --primary: #e4bc63;
+  --primary-hover: #f0cd7f;
+  --primary-fg: #0f1f3d;
+  --ring: #e4bc63;
+  --shadow-card: none;
+  --shadow-pop: 0 8px 32px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-navy-900: #0f1f3d;
+  --color-navy-800: #142a50;
+  --color-navy-700: #1b3260;
+  --color-gold-500: #c9962b;
+  --color-gold-300: #e4bc63;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-ring: var(--ring);
+  --color-st-open: #3b7bd0;
+  --color-st-assigned: #7c5cd6;
+  --color-st-in_progress: #e0a030;
+  --color-st-resolved: #1f9e89;
+  --color-st-closed: #64748b;
+  --color-st-reopened: #e2654b;
+  --color-st-rejected: #9ca3af;
+  --color-sev-low: #64748b;
+  --color-sev-medium: #3b7bd0;
+  --color-sev-high: #e0a030;
+  --color-sev-critical: #dc2626;
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 48px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: rgb(228 188 99 / 0.4);
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .campus-grid {
+    background-image:
+      linear-gradient(rgb(228 188 99 / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(228 188 99 / 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Leaflet pulsing pin used on maps and the Live Booth */
+.pulse-pin {
+  position: relative;
+}
+.pulse-pin::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  border: 3px solid currentColor;
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+@keyframes pulse-ring {
+  from {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--surface-2);
+}
