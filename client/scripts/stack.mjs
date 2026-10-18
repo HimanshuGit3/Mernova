@@ -36,7 +36,9 @@ const serverEnv = {
 function run(cmd, args, opts) {
   return new Promise((resolve, reject) => {
     const p = spawn(cmd, args, { stdio: 'inherit', shell: false, ...opts });
-    p.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(' ')} exited with ${code}`))));
+    p.on('exit', (code) =>
+      code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(' ')} exited with ${code}`)),
+    );
   });
 }
 
@@ -54,8 +56,15 @@ async function waitFor(url, timeoutMs = 60000) {
   throw new Error(`Timed out waiting for ${url}`);
 }
 
-export async function startStack({ seed = true, quiet = false } = {}) {
-  if (seed) await run(process.execPath, ['scripts/seed.js', '--reset'], { cwd: serverDir, env: serverEnv, stdio: quiet ? 'ignore' : 'inherit' });
+export async function startStack({ seed = true, quiet = false, ai = false } = {}) {
+  // AI off by default for deterministic tests; screenshots turn it on to show the AI chip.
+  if (ai) serverEnv.AI_TRIAGE_ENABLED = 'true';
+  if (seed)
+    await run(process.execPath, ['scripts/seed.js', '--reset'], {
+      cwd: serverDir,
+      env: serverEnv,
+      stdio: quiet ? 'ignore' : 'inherit',
+    });
   const stdio = quiet ? 'ignore' : 'inherit';
   const api = spawn(process.execPath, ['server.js'], { cwd: serverDir, env: serverEnv, stdio });
   const viteBin = path.resolve(clientDir, '..', 'node_modules', 'vite', 'bin', 'vite.js');

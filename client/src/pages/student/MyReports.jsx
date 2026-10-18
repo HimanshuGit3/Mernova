@@ -94,7 +94,7 @@ export function MyReportsPage() {
         className="mb-5"
       />
       {list.loading && !list.data ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-72 rounded-[var(--radius-card)]" />
           ))}
@@ -118,7 +118,7 @@ export function MyReportsPage() {
         </Card>
       ) : (
         <>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {list.data.items.map((issue, i) => (
               <motion.li key={issue.id} {...stagger(i)}>
                 <Link to={`/my-reports/${issue.id}`} className="group block h-full">

@@ -227,7 +227,7 @@ export function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2" aria-labelledby="attention-title">
           <CardHeader
             id="attention-title"

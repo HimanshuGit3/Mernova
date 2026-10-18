@@ -101,7 +101,7 @@ export function IssuesPage() {
   }
 
   const filterPanel = (
-    <div className="grid gap-4 border-t border-border px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_1fr]">
+    <div className="grid grid-cols-1 gap-4 border-t border-border px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <div className="flex flex-col gap-3">
         <div>
           <p className="mb-1.5 text-xs font-bold tracking-wide text-muted uppercase">Status</p>
@@ -130,7 +130,7 @@ export function IssuesPage() {
           />
         </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-bold tracking-wide text-muted uppercase">Category</span>
           <Select value={filters.category} onChange={(e) => update({ category: e.target.value })}>

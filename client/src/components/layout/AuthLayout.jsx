@@ -80,7 +80,7 @@ function CampusArt() {
 /** Split screen: brand panel (navy, gold accents, campus grid, tagline, highlights) + form card. */
 export function AuthLayout({ title, subtitle, children, footer }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
+    <div className="grid min-h-dvh grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       <aside className="campus-grid relative hidden flex-col justify-between overflow-hidden bg-navy-900 p-10 text-white lg:flex xl:p-14">
         <div
           className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-gold-500/15 blur-3xl"
