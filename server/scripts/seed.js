@@ -363,7 +363,9 @@ async function main() {
     const slaMs = computeDueAt(0, severity).getTime();
     let age;
     if (['closed', 'rejected'].includes(status)) age = between(4, 30) * DAY;
-    else if (['resolved', 'reopened'].includes(status)) age = between(2, 12) * DAY;
+    // resolved issues stay inside the AUTO_CLOSE_HOURS window, so the job does not close them at start-up
+    else if (status === 'resolved') age = between(0.6, 2.4) * DAY;
+    else if (status === 'reopened') age = between(2, 12) * DAY;
     else if (index % 11 === 0) age = between(0.1, 0.6) * Math.min(slaMs, 6 * HOUR);
     else age = Math.min(20 * DAY, slaMs * (rand() < 0.3 ? between(1.1, 2.5) : between(0.1, 0.85)));
     const createdAt = new Date(now - age);
