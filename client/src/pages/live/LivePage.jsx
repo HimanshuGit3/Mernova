@@ -190,7 +190,12 @@ export function LivePage() {
             aria-label="Live campus map"
             className="relative min-h-[360px] flex-1 overflow-hidden rounded-2xl border border-white/10"
           >
-            <BaseMap dark className="h-[56dvh] min-h-[360px] xl:h-full" zoom={17} label="Live map of issues">
+            <BaseMap
+              dark
+              className="h-[56dvh] min-h-[360px] xl:h-full"
+              zoom={17}
+              label="Live map of issues"
+            >
               {pins.map((p) => (
                 <Marker
                   key={p.id}

@@ -52,7 +52,10 @@ test('admin filters issues and assigns one', async ({ page }) => {
   await signInAs(page, 'admin');
   await page.goto('/issues');
   await page.getByRole('button', { name: /Filters/ }).click();
-  await page.getByRole('group', { name: 'Status' }).getByRole('button', { name: 'Open', exact: true }).click();
+  await page
+    .getByRole('group', { name: 'Status' })
+    .getByRole('button', { name: 'Open', exact: true })
+    .click();
   await expect(page).toHaveURL(/status=open/);
   const rows = page.locator('tbody tr');
   await expect(rows.first()).toBeVisible();
@@ -66,7 +69,11 @@ test('admin filters issues and assigns one', async ({ page }) => {
 
   await rows.first().getByRole('link').first().click();
   await expect(page).toHaveURL(/\/issues\/[a-f0-9]{24}$/);
-  const panel = page.getByRole('region', { name: /Assign a technician/ }).or(page.locator('section', { has: page.getByRole('heading', { name: 'Assign a technician' }) }));
+  const panel = page
+    .getByRole('region', { name: /Assign a technician/ })
+    .or(
+      page.locator('section', { has: page.getByRole('heading', { name: 'Assign a technician' }) }),
+    );
   await expect(panel.first()).toBeVisible();
   await panel.first().getByRole('button', { name: 'Assign' }).first().click();
   await expect(page.getByText(/^Assigned to /).first()).toBeVisible();
@@ -80,7 +87,9 @@ test('a student sees only their own reports', async ({ page }) => {
 
   const admin = await apiLogin(ACCOUNTS.admin);
   const all = await api('GET', '/issues?limit=50', admin.token);
-  const foreign = all.body.items.find((i) => !ownTitles.has(i.title) && i.reporter?.name !== 'Asha Rao');
+  const foreign = all.body.items.find(
+    (i) => !ownTitles.has(i.title) && i.reporter?.name !== 'Asha Rao',
+  );
   expect(foreign).toBeTruthy();
 
   await signInAs(page, 'student');
