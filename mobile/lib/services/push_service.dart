@@ -78,18 +78,18 @@ class PushService {
   }
 
   /// Register this device for the signed-in user (POST /auth/fcm-token).
+  /// `onRegistered` delivers the first token and every refresh; each one is sent to the server.
   Future<void> registerDevice() async {
     if (!_ready) return;
     try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token == null) return;
-      _token = token;
-      await api.post('/auth/fcm-token', data: {'token': token});
-      await _refreshSub?.cancel();
-      _refreshSub = FirebaseMessaging.instance.onTokenRefresh.listen((t) {
+      _refreshSub ??= FirebaseMessaging.instance.onRegistered.listen((t) {
         _token = t;
         api.post('/auth/fcm-token', data: {'token': t}).ignore();
       });
+      // A token we already know (e.g. a new user signed in on this phone) is sent right away.
+      final known = _token;
+      if (known != null) await api.post('/auth/fcm-token', data: {'token': known});
+      await FirebaseMessaging.instance.register();
     } catch (e) {
       debugPrint('[push] token registration failed: $e');
     }

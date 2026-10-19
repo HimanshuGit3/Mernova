@@ -56,7 +56,12 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> with LiveRefresh<
   Future<void> _load() async {
     try {
       final issue = await _service.get(widget.issueId);
-      if (mounted) setState(() => (_issue, _error) = (issue, null));
+      if (mounted) {
+        setState(() {
+          _issue = issue;
+          _error = null;
+        });
+      }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.status == 404 ? 'This issue does not exist or you no longer have access to it.' : e.message);
     }
@@ -420,7 +425,12 @@ class _ResolveSheetState extends State<_ResolveSheet> {
       final raw = await _photos.pick(camera: camera);
       if (raw != null) {
         final compressed = await _photos.compress(raw);
-        if (mounted) setState(() => (_photo, _error) = (compressed, null));
+        if (mounted) {
+          setState(() {
+            _photo = compressed;
+            _error = null;
+          });
+        }
       }
     } catch (_) {
       if (mounted) setState(() => _error = 'Could not open the camera. Try the gallery.');

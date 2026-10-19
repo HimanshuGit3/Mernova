@@ -149,7 +149,7 @@ class IssuesService {
     final form = FormData.fromMap({
       if (lat != null && lng != null) 'lat': lat.toString(),
       if (lat != null && lng != null) 'lng': lng.toString(),
-      if (locationId != null) 'locationId': locationId,
+      'locationId': ?locationId,
       'photo': await MultipartFile.fromFile(photoPath, filename: 'photo.jpg', contentType: DioMediaType('image', 'jpeg')),
     });
     return Analysis.fromJson(await api.post('/issues/analyse', data: form));

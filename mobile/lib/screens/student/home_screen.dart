@@ -267,7 +267,12 @@ class _FixedFeedScreenState extends State<FixedFeedScreen> with LiveRefresh<Fixe
   Future<void> _load() async {
     try {
       final page = await context.read<IssuesService>().feed(limit: 20);
-      if (mounted) setState(() => (_items, _error) = (page.items, null));
+      if (mounted) {
+        setState(() {
+          _items = page.items;
+          _error = null;
+        });
+      }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
     }

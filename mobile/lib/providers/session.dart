@@ -84,7 +84,7 @@ class Session extends ChangeNotifier {
   Future<void> logout({String? fcmToken}) async {
     final token = fcmToken ?? deviceToken?.call();
     try {
-      await api.post('/auth/logout', data: {if (token != null) 'fcmToken': token});
+      await api.post('/auth/logout', data: {'fcmToken': ?token});
     } catch (_) {
       // Sign out locally even if the server cannot be reached.
     }

@@ -37,7 +37,12 @@ class _JobsScreenState extends State<JobsScreen> with LiveRefresh<JobsScreen> {
             sort: _done ? 'newest' : 'priority',
             limit: 50,
           );
-      if (mounted) setState(() => (_jobs, _error) = (page.items, null));
+      if (mounted) {
+        setState(() {
+          _jobs = page.items;
+          _error = null;
+        });
+      }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
     }

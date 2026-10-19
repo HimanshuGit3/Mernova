@@ -63,6 +63,7 @@ void main() {
 
   group('report form validation', () {
     testWidgets('missing title, category, photo and landmark are all reported', (tester) async {
+      await useTallScreen(tester);
       ReportDraft? sent;
       await tester.pumpWidget(_app(Scaffold(
         body: ReportDetailsForm(
@@ -83,6 +84,7 @@ void main() {
     });
 
     testWidgets('with GPS the landmark is optional', (tester) async {
+      await useTallScreen(tester);
       await tester.pumpWidget(_app(Scaffold(
         body: ReportDetailsForm(
           photoPath: null,
@@ -176,4 +178,10 @@ void main() {
 /// A const GPS fix for widget tests.
 abstract final class GpsFixForTest {
   static const fix = GpsFix(13.1718, 77.5362, 8);
+}
+
+/// A tall phone-width surface so the whole (lazily built) report form exists in the tree.
+Future<void> useTallScreen(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(400, 2400));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
 }

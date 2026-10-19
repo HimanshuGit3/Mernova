@@ -58,7 +58,7 @@ class _ReportFlowScreenState extends State<ReportFlowScreen> {
     if (!mounted || _location is RoomScanned) return; // a scanned room beats GPS indoors (D9)
     setState(() {
       _location = switch (result) {
-        GpsFix fix => GpsReady(fix),
+        final GpsFix fix => GpsReady(fix),
         GpsUnavailable(:final reason, :final canOpenSettings) => NoGps(reason, canOpenSettings: canOpenSettings),
       };
     });

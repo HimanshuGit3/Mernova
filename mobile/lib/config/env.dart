@@ -1,7 +1,7 @@
 /// Build-time configuration (D8).
 ///
 /// Emulator:        --dart-define=API_BASE_URL=http://10.0.2.2:5000
-/// Phone on Wi-Fi:  --dart-define=API_BASE_URL=http://<laptop LAN IPv4>:5000
+/// Phone on Wi-Fi:  --dart-define=API_BASE_URL=`http://<laptop LAN IPv4>:5000`
 abstract final class Env {
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',

@@ -91,10 +91,10 @@ class ReportDetailsFormState extends State<ReportDetailsForm> {
   }
 
   @override
-  void didUpdateWidget(covariant ReportDetailsForm old) {
-    super.didUpdateWidget(old);
+  void didUpdateWidget(covariant ReportDetailsForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
     // Apply a late AI suggestion only if the user has not chosen yet.
-    if (widget.initialCategory != null && old.initialCategory != widget.initialCategory && _category == null) {
+    if (widget.initialCategory != null && oldWidget.initialCategory != widget.initialCategory && _category == null) {
       _category = widget.initialCategory;
     }
   }
