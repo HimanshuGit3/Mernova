@@ -86,6 +86,9 @@ Future<void> main() async {
       push.registerDevice();
       flush(force: true);
     } else {
+      // Banners live on the app-wide messenger and outlive the screens: never show
+      // the previous user's notification (and its "View" link) on the login screen.
+      messengerKey.currentState?.clearSnackBars();
       biometric.reset();
     }
   });
