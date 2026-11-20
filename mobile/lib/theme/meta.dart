@@ -69,7 +69,8 @@ String formatDuration(Duration d) {
 
 String timeAgo(DateTime t, {DateTime? now}) {
   final diff = (now ?? DateTime.now()).difference(t);
-  if (diff.inSeconds < 45) return 'just now';
+  // Under a full minute, inMinutes is 0: never show "0 min ago".
+  if (diff.inMinutes < 1) return 'just now';
   if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
   if (diff.inHours < 24) return '${diff.inHours} h ago';
   if (diff.inDays == 1) return 'yesterday';
