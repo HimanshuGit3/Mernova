@@ -111,7 +111,7 @@ Password for all: **`FixIt@2026`** (`SEED_PASSWORD`).
 
 | Role | Email | Notes |
 | --- | --- | --- |
-| Admin | `admin@fixit.campus` | Priya Menon, web dashboard |
+| Admin | `admin@fixit.campus` | Arun Das, web dashboard |
 | Technician | `ravi.tech@fixit.campus` | electrical, network |
 | Technician | `suresh.tech@fixit.campus` | plumbing, cleanliness |
 | Technician | `anil.tech@fixit.campus` | furniture, other, safety |

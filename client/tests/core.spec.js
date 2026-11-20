@@ -13,7 +13,7 @@ test.describe('sign in as each role', () => {
   test('admin lands on the dashboard with KPIs', async ({ page }) => {
     await loginThroughForm(page, ACCOUNTS.admin);
     await expect(page).toHaveURL(/\/dashboard$/);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Priya');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Arun');
     for (const kpi of ['Open issues', 'Overdue', 'Resolved this week', 'Avg resolution time']) {
       await expect(page.getByText(kpi, { exact: true })).toBeVisible();
     }

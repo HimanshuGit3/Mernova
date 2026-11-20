@@ -134,7 +134,7 @@ const BUILDINGS = [
 ];
 
 const STAFF = [
-  { name: 'Priya Menon', email: 'admin@fixit.campus', role: 'admin', department: 'Estate Office' },
+  { name: 'Arun Das', email: 'admin@fixit.campus', role: 'admin', department: 'Estate Office' },
   {
     name: 'Ravi Kumar',
     email: 'ravi.tech@fixit.campus',
